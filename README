@@ -1,0 +1,39 @@
+Installation
+
+The package PyAR is available from the website: ***********
+The package should be added to PYTHONPATH variable to be able to call
+it from anywhere. The package has the following dependency:
+
+1) Python
+  The program is written in python2.7. Please visit the website:
+  https://www.python.org/
+
+2) TURBOMOLE:
+  The modules turbomole.py assumes that the TURBOMOLE is installed and
+  all it is in the PATH. For details about TURBOMOLE, please visit the
+  website: http://www.turbomole-gmbh.com/
+  Please note that a modified version of the jobex script is available
+  with PyAR package. This script has to call by the pathname.
+
+3) MOPAC:
+  The module mopac.py assumes that mopac is installed in the computer
+  and it is is callable by 'mopac' command. Add the MOPAC path to
+  PATH variable and create a softlink of the MOPAC2016.exe or whichever
+  version are using as 'mopac' in the installed directory. For details,
+  please visit the website: http://openmopac.net/
+
+4) OpenBabel:
+  It uses the InCHi and Smiles string functionalities from the OpenBabel
+  package. It should also be callable by the command 'babel'. For 
+  details, please visit the website: http://openbabel.org/wiki/Main_Page
+
+
+How to Run:
+1) To use the binary reaction functionality, please copy the Reactor.py 
+   to the working directory. Then, the program can be run by: 
+   $python2.7 Reactor.py molecule1.xyz molecule2.xyz
+
+2) To use the aggregation functionality, please copy the nucleation_genetic.py
+   file to the working directory. Then, run the program by:
+   $python2.7 nucleation_genetic.py molecule1.xyz molecule2.xyz
+

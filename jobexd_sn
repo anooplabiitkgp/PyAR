@@ -1,0 +1,131 @@
+#!/bin/bash
+
+USAGE() {
+cat <<EOF
+
+usage : jobexd_sn -a gamma_value -dftd2/zero/bj -ri -c number
+
+
+        -a gamma_value => is switch on and supply gamma value
+        -dftd2 is for dftd2 => -dftd2 ||||| -zero => zero correction
+        -bj => bj correction
+        -c number => is for maximum number of cycles to be run
+         
+EOF
+}
+AFIR='n'
+out=job.out
+CODE=""
+DFTD3CODE='dftd3_new'
+STATPT='statpt'
+PROGE='dscf'
+PROGG='grad'
+dftd3='n'
+dftd2='n'
+dftd4='n'
+declare -x DFTD3CODE="/home/surajit/bin/dftd3"
+if [ ! -s ./control ]; then
+    echo ""
+    echo "control file missing or it is empty; exiting with exit status 1" >&2
+    echo ""
+    exit 1
+fi
+if [ ! -s ./fragment ]; then
+    echo ""
+    echo "fragment file missing or it is empty; exiting with exit status 1"
+    echo ""
+    exit 1
+fi
+FUNC=`grep -i 'functional' control | gawk '{print $2}'`
+
+cycles=100
+
+actual -r
+rm -rf $out
+rm -rf dscf_problem
+kdg vdwx
+kdg vdw
+
+# argument checking
+argcheck=y
+optstr=$@
+if [ -z "$1" ]
+  then
+    echo "no argument supplied"
+    USAGE
+    exit 1
+fi
+
+while getopts ":a:c:" OPTION
+do
+    case $OPTION in
+       a) AFIR=$OPTARG;;
+       c) cycles=$OPTARG;;
+    esac
+done
+
+while [ "$argcheck" = "y" ]; do
+  if [ -n "$1" ]; then
+    case $1 in
+      "-ri"    ) ri="y" ;;
+      "-relax" ) STATPT="relax" ;;
+        "-dftd2" ) dftd2="y" ;;
+        "-zero"  ) dftd3="y" ;;
+        "-bj"    ) dftd4="y" ;;
+#        "-cycles" | "-c") shift;
+#            if [ -n "$1" ]; then
+#               case $1 in
+#                  [0-9]*) cycles=$1 ;;
+#               esac
+#            else
+#               argcheck=n
+#            fi ;;
+      esac
+      shift
+   else
+      argcheck=n
+   fi
+done
+
+[ "$ri" = "y" ]    &&  { PROGE='ridft' ; PROGG='rdgrad' ;}
+[ "$dftd2" = "y" ] &&  { dftd3='n' ;}
+[ "$dftd3" = "y" ] &&  { dftd2='n' ;}
+
+echo "CODE   "$CODE
+echo "PROGS  "$PROGE"  "$PROGG"   "$STATPT
+echo "FUNC   "$FUNC
+echo "DFT-D3 "$dftd3
+echo "DFT-D2 "$dftd2
+echo "BJ-dmp "$dftd4
+echo "cycles "$cycles
+echo "AFIR gamma value  "$AFIR
+c=0
+while [ $c -lt $cycles ]
+  do
+  c=`expr $c \+ 1`
+  echo "Cycle number: " $c
+# run prog.
+  mv $out job.last
+  $CODE$PROGE  > $out
+  $CODE$PROGG >> $out
+  [ "$dftd4" = "y" ] &&  { $DFTD3CODE  coord -grad -bj   -func  $FUNC -afir $AFIR >>$out ;} && { echo " AFIR-dftd3 with bj-correction complete" >&2 ; }
+  [ "$dftd3" = "y" ] &&  { $DFTD3CODE  coord -grad -zero -func  $FUNC -afir $AFIR  >>$out ;} && { echo " AFIR-dftd3 with zero-correction complete" >&2 ; }
+  [ "$dftd2" = "y" ] &&  { $DFTD3CODE  coord -grad -old  -func  $FUNC -afir $AFIR >>$out ;} && { echo " AFIR-dftd3 with dftd2 correction complete" >&2 ; }
+  if test -f dscf_problem
+  then
+    echo 'energy or dftd3 step seems to be in error'
+    exit
+  fi
+# opt
+  $STATPT >> $out
+  rm -f tmpx
+# check for conv.
+  convgrep >> $out
+  grep '$convergence reached' not.converged > tmpx
+  if test -s tmpx
+  then
+   rm not.converged tmpx
+   echo 'converged'
+   exit
+  fi
+done
