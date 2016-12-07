@@ -1,6 +1,6 @@
 Installation
 
-The package PyAR is available from the website: ***********
+The package PyAR is available from the website: https://github.com/anooplabiitkgp/PyAR
 The package should be added to PYTHONPATH variable to be able to call
 it from anywhere. The package has the following dependency:
 
@@ -42,4 +42,9 @@ How to Run:
 2) To use the aggregation functionality, please copy the nucleation_genetic.py
    file to the working directory. Then, run the program by:
    $python2.7 nucleation_genetic.py molecule1.xyz molecule2.xyz
+   In this case, the program will choose molecule1.xyz as the solvent and make
+   the aggregation of molecule2.xyz around molecule1.xyz.
+   If the program is called by:
+   $python2.7 nucleation_genetic.py molecule.xyz
+   then, aggregation of only the molecule.xyz will be considered.
 
