@@ -17,10 +17,16 @@ it from anywhere. The package has the following dependency:
 
 3) MOPAC:
   The module mopac.py assumes that mopac is installed in the computer
-  and it is is callable by 'mopac' command. Add the MOPAC path to
-  PATH variable and create a softlink of the MOPAC2016.exe or whichever
-  version are using as 'mopac' in the installed directory. For details,
-  please visit the website: http://openmopac.net/
+  and it is is callable by 'mopac' command. Note that Python does not
+  accept aliases set in the .bashrc file. So, to avoid any error, call
+  the 'mopac' program with the entire path, e.g., 
+
+  >>>with open('outputfile', 'w') as fopt:
+  >>>  subprocess.Popen(['/path/to/mopac', 'outputfile'], stdout=fopt, stderr=fopt)
+
+  Add the MOPAC path to PATH variable and create a softlink of the MOPAC2016.exe 
+  or whichever version are using as 'mopac' in the installed directory. 
+  For details, please visit the website: http://openmopac.net/
 
 4) OpenBabel:
   It uses the InCHi and Smiles string functionalities from the OpenBabel
